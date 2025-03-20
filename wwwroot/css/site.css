@@ -1,0 +1,175 @@
+﻿html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.home-background {
+    background-image: url('/images/Ducks_1.jpg');
+    background-size: contain; /* A kép teljesen látszik, kitölti a képernyőt */
+    background-position: center center; /* Középre igazítás */
+    background-repeat: no-repeat; /* Nem ismétlődik */
+    background-attachment: scroll; /* A kép nem mozdul el görgetéskor */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #343a40;
+    color: black;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.filter-header {
+    position: relative;
+    cursor: pointer;
+    text-align: center;
+    padding-right: 20px; /* Hely a nyílnak */
+    white-space: nowrap;
+}
+
+.filter-icon {
+    margin-left: 5px;
+    font-size: 0.8rem;
+    color: gray;
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-dropdown {
+    display: none;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    font-size: 14px;
+    z-index: 100;
+    width: 120px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.filter-option {
+    padding: 5px;
+    cursor: pointer;
+}
+
+    .filter-option:hover {
+        background-color: #f0f0f0;
+    }
+
+/* Nyitott állapot */
+.filter-header.active .filter-dropdown {
+    display: block;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    position: relative;
+}
+
+.warTourTable {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: max-content; /* A táblázat ne zsugorodjon */
+    min-width: 100%;
+}
+
+.warTourTable th{
+    background: white;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+.warTourTable td {
+    
+    border: 1px solid #ddd;
+    text-align: center;
+    background: #f2f2f2;
+}
+
+/* Első oszlop rögzítése */
+.warTourTable th:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    border-right: 1px solid #ddd;
+    z-index: 2;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+.warTourTable td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f2f2f2;
+    border-right: 1px solid #ddd;
+    z-index: 2;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+.login-container {
+    position: absolute;
+    top: 80px; /* A menüsor alatt marad */
+    left: 2%; /* A bal szélhez igazítva, de rugalmas */
+    max-width: 320px; /* Max szélesség, hogy ne legyen túl nagy */
+    width: 90%; /* Mobilon is szépen néz ki */
+}
+
+/* Középre igazítás kisebb képernyőn */
+@media (max-width: 768px) {
+    .login-container {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+    }
+}
+.welcome-container {
+    position: absolute;
+    top: 80px; /* A menüsor alatt marad */
+    left: 2%; /* A bal szélhez igazítva, de rugalmas */
+    max-width: 320px; /* Max szélesség, hogy ne legyen túl nagy */
+    width: 90%; /* Mobilon is szépen néz ki */
+}
+
+.welcome-text {
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* Dinamikus méret */
+    font-weight: bold;
+    color: #2c3e50;
+    background: linear-gradient(90deg, #3498db, #8e44ad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+    padding-bottom: 5px;
+    border-bottom: 3px solid #3498db;
+}

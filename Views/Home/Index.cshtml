@@ -1,0 +1,38 @@
+﻿@{
+    ViewData["BodyClass"] = "home-background";
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="welcome-container">
+        <h2 class="welcome-text">Üdv, @User.Identity.Name!</h2>
+@*        <form method="post" asp-action="Logout" asp-controller="Home">
+            <button type="submit" class="btn btn-danger mt-3">Kijelentkezés</button>
+    </form> *@
+    </div>
+}
+else
+{
+    <div class="login-container">
+        <div class="card p-4 shadow">
+            <h3 class="text-center mb-3">Bejelentkezés</h3>
+
+            @if (ViewData["Error"] != null)
+            {
+                <div class="alert alert-danger text-center">@ViewData["Error"]</div>
+            }
+
+            <form method="post" asp-action="Login" asp-controller="Home">
+                <div class="mb-3">
+                    <label for="username" class="form-label">Felhasználónév</label>
+                    <input type="text" class="form-control" id="username" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Jelszó</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Belépés</button>
+            </form>
+        </div>
+    </div>
+}

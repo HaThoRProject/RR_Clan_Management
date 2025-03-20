@@ -1,0 +1,143 @@
+﻿@model RR_Clan_Management.ViewModels.WarTourViewModel
+
+<h2>WarTour</h2>
+
+@if (Model.Rows.Count == 0)
+{
+    <p style="color: red;">⚠ Nincsenek megjeleníthető játékosok!</p>
+}
+
+<label>
+    <input type="checkbox" id="showAllPlayers" onchange="reloadPlayers()" @(ViewBag.ShowAll ? "checked" : "")>
+    Összes játékos megjelenítése
+</label>
+
+
+<button id="edit-btn" class="btn btn-primary">Szerkesztés</button>
+<button id="add-column-btn" class="btn btn-secondary" style="display:none;">Oszlop hozzáadása</button>
+<button id="save-btn" class="btn btn-success" style="display:none;">Mentés</button>
+<div class="table-container">
+    <table class="warTourTable">
+    <thead>
+        <tr id="table-header">
+            <th>Játékos neve</th>
+            @foreach (var column in Model.ColumnHeaders)
+            {
+                <th>@column</th> <!-- 📌 Minden oszlop fejlécnek bekerül -->
+            }
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        @foreach (var row in Model.Rows)
+        {
+            <tr>
+                <td>@row.PlayerName</td>
+                @foreach (var column in Model.ColumnHeaders)
+                {
+                    <td>@(row.Columns.ContainsKey(column) ? row.Columns[column] : "-")</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+
+
+<script>
+    document.getElementById("edit-btn").addEventListener("click", function () {
+        document.getElementById("add-column-btn").style.display = "inline-block";
+        document.getElementById("save-btn").style.display = "inline-block";
+    });
+
+    document.getElementById("add-column-btn").addEventListener("click", function () {
+        let tableHeader = document.getElementById("table-header");
+        let newTh = document.createElement("th");
+        let input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control";
+        input.placeholder = "Oszlop név";
+        newTh.appendChild(input);
+        tableHeader.appendChild(newTh);
+
+        let tableBody = document.getElementById("table-body");
+        let rows = tableBody.getElementsByTagName("tr");
+
+        for (let row of rows) {
+            let newTd = document.createElement("td");
+            let select = document.createElement("select");
+            select.className = "form-control";
+
+            let options = ["Részt vett", "Részben vett részt", "Nem vett részt", "Felmentve"];
+            options.forEach(optionText => {
+                let option = document.createElement("option");
+                option.value = optionText;
+                option.textContent = optionText;
+                select.appendChild(option);
+            });
+
+            newTd.appendChild(select);
+            row.appendChild(newTd);
+        }
+    });
+
+    document.getElementById("save-btn").addEventListener("click", function () {
+        let table = document.getElementById("table-body");
+        let rows = table.getElementsByTagName("tr");
+        let headers = document.getElementById("table-header").getElementsByTagName("th");
+
+        let columnNames = [];
+        for (let i = 1; i < headers.length; i++) {
+            let input = headers[i].querySelector("input");
+            columnNames.push(input ? input.value : headers[i].textContent);
+        }
+
+        let data = [];
+        for (let row of rows) {
+            let playerName = row.cells[0].textContent;
+            let rowData = { PlayerName: playerName, Columns: {} };
+
+            for (let i = 1; i < row.cells.length; i++) {
+                let select = row.cells[i].querySelector("select");
+                if (select) {
+                    rowData.Columns[columnNames[i - 1]] = select.value;
+                }
+            }
+
+            data.push(rowData);
+        }
+
+        fetch('/WarTour/Save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        }).then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // ✅ Ha sikeres a mentés, frissítjük az oldalt
+                }
+
+        });
+    });
+</script>
+
+<script>
+    function reloadPlayers() {
+        var showAll = document.getElementById("showAllPlayers").checked;
+        window.location.href = '/WarTour?showAll=' + showAll;
+    }
+
+    window.onload = function () {
+        var urlParams = new URLSearchParams(window.location.search);
+        var showAll = urlParams.get('showAll') === 'true';
+        document.getElementById("showAllPlayers").checked = showAll;
+
+        // 🔹 "Szerkesztés" gomb elrejtése, ha a checkbox be van pipálva
+        var editButton = document.getElementById("edit-btn");
+        if (editButton) {
+            editButton.style.display = showAll ? "none" : "inline-block";
+        }
+    };
+</script>

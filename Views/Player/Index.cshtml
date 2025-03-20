@@ -1,0 +1,329 @@
+﻿@model List<RR_Clan_Management.Models.Player>
+
+
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Játékosok</title>
+    <!-- jQuery betöltése (MINDIG előbb kell lennie!) -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+</head>
+<body>
+    <h2>Játékosok listája</h2>
+    <a asp-controller="Player" asp-action="Create" class="btn btn-primary mb-3">+ Player felvétele</a>
+    <div class="table-responsive">
+    <table id="playersTable" class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th> <!-- Sorszám oszlop -->
+                    <th class="filter-header">
+                        Név <span class="filter-icon">▼</span>
+                        <div class="filter-dropdown">
+                            <div class="filter-option" data-value="">Összes</div>
+                            <div class="filter-option" data-value="empty">Üres</div>
+                            <div class="filter-option" data-value="filled">Kitöltött</div>
+                        </div>
+                    </th>
+                    <th class="filter-header">
+                        Játékos név <span class="filter-icon">▼</span>
+                        <div class="filter-dropdown">
+                            <div class="filter-option" data-value="">Összes</div>
+                            <div class="filter-option" data-value="empty">Üres</div>
+                            <div class="filter-option" data-value="filled">Kitöltött</div>
+                        </div>
+                    </th>
+                    <th class="filter-header">
+                        Csatlakozás dátuma <span class="filter-icon">▼</span>
+                        <div class="filter-dropdown">
+                            <div class="filter-option" data-value="">Összes</div>
+                            <div class="filter-option" data-value="empty">Üres</div>
+                            <div class="filter-option" data-value="filled">Kitöltött</div>
+                        </div>
+                    </th>
+                    <th class="filter-header">
+                        Távozás dátuma <span class="filter-icon">▼</span>
+                        <div class="filter-dropdown">
+                            <div class="filter-option" data-value="">Összes</div>
+                            <div class="filter-option" data-value="empty">Üres</div>
+                            <div class="filter-option" data-value="filled">Kitöltött</div>
+                        </div>
+                    </th>
+                    <th>Megjegyzés</th>
+                </tr>
+            </thead>
+
+
+
+
+
+        <tbody>
+            @{
+                    int index = 1; // Sorszámozás indul 1-től
+             }
+            @foreach (var player in Model)
+            {
+                <tr>
+                    <td class="row-index"></td>
+                    <td>@player.Name</td>
+                    <td>@player.PlayerName</td>
+                    <td>@player.FormattedJoinDate</td>
+                    <td>@player.FormattedLeaveDate</td>
+                    <td>@player.Notes</td>
+                        <td>
+                            <a asp-controller="Player" asp-action="Edit" asp-route-id="@player.Id" class="btn btn-warning btn-sm">Módosítás</a>
+                        </td>
+                </tr>
+                    index++;
+            }
+        </tbody>
+    </table>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#playersTable').DataTable({
+                "order": [[0, "asc"]], // Alapértelmezett rendezés az első oszlop szerint
+                "columnDefs": [
+                    { "orderable": true, "targets": "_all" } // Minden oszlopot rendezhetővé teszünk
+                ]
+            });
+        });
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let filters = {
+                name: document.getElementById("nameFilter"),
+                playerName: document.getElementById("playerNameFilter"),
+                joinDate: document.getElementById("joinDateFilter"),
+                leaveDate: document.getElementById("LeaveDateFilter")
+            };
+
+            function applyFilters() {
+                let rows = document.querySelectorAll("#playersTable tbody tr");
+                let index = 1; // Mindig 1-től induljon a sorszámozás
+
+                rows.forEach(row => {
+                    let nameCell = row.cells[1].textContent.trim();
+                    let playerNameCell = row.cells[2].textContent.trim();
+                    let joinDateCell = row.cells[3].textContent.trim();
+                    let leaveDateCell = row.cells[4].textContent.trim();
+
+                    let show = true;
+
+                    if (filters.name.value === "empty" && nameCell !== "") show = false;
+                    if (filters.name.value === "filled" && nameCell === "") show = false;
+
+                    if (filters.playerName.value === "empty" && playerNameCell !== "") show = false;
+                    if (filters.playerName.value === "filled" && playerNameCell === "") show = false;
+
+                    if (filters.joinDate.value === "empty" && joinDateCell !== "") show = false;
+                    if (filters.joinDate.value === "filled" && joinDateCell === "") show = false;
+
+                    if (filters.leaveDate.value === "empty" && leaveDateCell !== "") show = false;
+                    if (filters.leaveDate.value === "filled" && leaveDateCell === "") show = false;
+
+                    if (show) {
+                        row.style.display = "";
+                        row.querySelector(".row-index").textContent = index++; // Sorszám frissítése
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            }
+
+            // Szűrők eseménykezelői
+            Object.values(filters).forEach(filter => filter.addEventListener("change", applyFilters));
+
+            // Első betöltéskor is frissítsen
+            applyFilters();
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".filter-icon").forEach(icon => {
+                icon.addEventListener("click", function (event) {
+                    event.stopPropagation();
+
+                    let header = this.parentElement;
+                    let dropdown = header.querySelector(".filter-dropdown");
+
+                    // Bezárja az összes többi nyitott lenyílót
+                    document.querySelectorAll(".filter-dropdown").forEach(d => {
+                        if (d !== dropdown) d.style.display = "none";
+                    });
+
+                    // Nyitja/zárja az adott lenyíló menüt
+                    dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                });
+            });
+
+            // Opció kiválasztása és szűrés végrehajtása
+            document.querySelectorAll(".filter-option").forEach(option => {
+                option.addEventListener("click", function () {
+                    let selectedValue = this.getAttribute("data-value");
+                    let header = this.closest(".filter-header");
+                    let columnIndex = Array.from(header.parentElement.children).indexOf(header);
+                    let dropdown = header.querySelector(".filter-dropdown");
+
+                    // Bezárja a lenyíló listát
+                    dropdown.style.display = "none";
+
+                    // Szűrés végrehajtása
+                    filterTable(columnIndex, selectedValue);
+                });
+            });
+
+            // Ha máshova kattintunk, bezárja a lenyílókat
+            document.addEventListener("click", function () {
+                document.querySelectorAll(".filter-dropdown").forEach(d => d.style.display = "none");
+            });
+
+            function filterTable(columnIndex, filterValue) {
+                let table = document.querySelector("table tbody");
+                let rows = table.querySelectorAll("tr");
+
+                rows.forEach(row => {
+                    let cell = row.children[columnIndex];
+                    let cellText = cell.textContent.trim();
+
+                    let showRow = true;
+
+                    if (filterValue === "empty") {
+                        showRow = cellText === "";
+                    } else if (filterValue === "filled") {
+                        showRow = cellText !== "";
+                    }
+
+                    row.style.display = showRow ? "" : "none";
+                });
+
+                // Újrasorszámozás a szűrés után
+                reindexRows();
+            }
+
+            function reindexRows() {
+                let table = document.querySelector("table tbody");
+                let rows = Array.from(table.querySelectorAll("tr")).filter(row => row.style.display !== "none");
+
+                rows.forEach((row, index) => {
+                    row.children[0].textContent = index + 1; // Az első oszlopban a sorszám frissítése
+                });
+            }
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let sortDirections = {};
+            let defaultSortColumn = 4; // Alapértelmezett oszlop: "Távozás dátuma"
+
+            function reindexRows() {
+                let table = document.querySelector("#playersTable tbody");
+                let rows = Array.from(table.querySelectorAll("tr")).filter(row => row.style.display !== "none");
+
+                rows.forEach((row, index) => {
+                    row.children[0].textContent = index + 1; // Frissíti a sorszámokat
+                });
+            }
+
+            function parseDate(dateString) {
+                if (!dateString || dateString.trim() === "") return new Date(0);
+                let parts = dateString.match(/(\d{4})-(\d{2})-(\d{2})/) || dateString.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                if (!parts) return new Date(0);
+                return new Date(parts[1], parts[2] - 1, parts[3]);
+            }
+
+            function sortTable(index, isDate = false) {
+                let table = document.querySelector("#playersTable tbody");
+                let rows = Array.from(table.querySelectorAll("tr"));
+
+                let sortDirection = sortDirections[index] || "asc";
+
+                rows.sort((a, b) => {
+                    let cellA = a.children[index]?.textContent.trim();
+                    let cellB = b.children[index]?.textContent.trim();
+
+                    if (isDate) {
+                        let dateA = parseDate(cellA);
+                        let dateB = parseDate(cellB);
+                        return sortDirection === "asc" ? dateA - dateB : dateB - dateA;
+                    }
+
+                    return sortDirection === "asc"
+                        ? cellA.localeCompare(cellB, undefined, { numeric: true, sensitivity: "base" })
+                        : cellB.localeCompare(cellA, undefined, { numeric: true, sensitivity: "base" });
+                });
+
+                table.innerHTML = "";
+                rows.forEach(row => table.appendChild(row));
+
+                reindexRows();
+
+                updateSortIcons(index, sortDirection);
+
+                sortDirections[index] = sortDirection === "asc" ? "desc" : "asc";
+            }
+
+            function updateSortIcons(activeIndex, direction) {
+                document.querySelectorAll(".filter-header .sort-icon").forEach((icon) => {
+                    let columnIndex = icon.closest("th").cellIndex; // Az oszlop tényleges indexe
+
+                    if (columnIndex === activeIndex) {
+                        icon.textContent = direction === "asc" ? "▲" : "▼";
+                    } else {
+                        icon.textContent = "";
+                    }
+                });
+            }
+
+            document.querySelectorAll(".filter-header").forEach((header) => {
+                if (header.cellIndex === 0) return; // Az első oszlop (#) ne legyen rendezhető
+
+                let sortIcon = document.createElement("span");
+                sortIcon.classList.add("sort-icon");
+                sortIcon.style.marginRight = "5px";
+
+                if (header.cellIndex === defaultSortColumn) {
+                    sortIcon.textContent = "▲";
+                    sortDirections[header.cellIndex] = "asc";
+                } else {
+                    sortIcon.textContent = "";
+                }
+
+                header.insertBefore(sortIcon, header.firstChild);
+
+                header.addEventListener("click", function (event) {
+                    if (event.target.classList.contains("filter-icon")) return;
+
+                    let isDate = ["Csatlakozás dátuma", "Távozás dátuma"].includes(header.textContent.trim());
+
+                    sortTable(header.cellIndex, isDate);
+                });
+            });
+
+            sortTable(defaultSortColumn, false);
+        });
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+</body>
+</html>

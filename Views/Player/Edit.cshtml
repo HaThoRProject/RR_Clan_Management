@@ -1,0 +1,35 @@
+﻿@model Player
+
+<h2>Player módosítása</h2>
+
+<form asp-controller="Player" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label for="Name">Név</label>
+        <input type="text" class="form-control" asp-for="Name" required>
+    </div>
+
+    <div class="form-group">
+        <label for="PlayerName">Játékosnév</label>
+        <input type="text" class="form-control" asp-for="PlayerName" required>
+    </div>
+
+    <div class="form-group">
+        <label for="JoinDate">Csatlakozás dátuma</label>
+        <input type="date" class="form-control" asp-for="JoinDate" required>
+    </div>
+
+    <div class="form-group">
+        <label for="LeaveDate">Távozás dátuma</label>
+        <input type="date" class="form-control" asp-for="LeaveDate">
+    </div>
+
+    <div class="form-group">
+        <label for="Notes">Megjegyzés</label>
+        <input type="text" class="form-control" asp-for="Notes">
+    </div>
+
+    <button type="submit" class="btn btn-success">Mentés</button>
+    <a asp-controller="Player" asp-action="Index" class="btn btn-secondary">Mégse</a>
+</form>
