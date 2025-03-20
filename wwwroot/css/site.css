@@ -163,13 +163,15 @@ tr:nth-child(even) {
 }
 
 .welcome-text {
-    font-size: clamp(1.5rem, 4vw, 2.5rem); /* Dinamikus méret */
-    font-weight: bold;
-    color: #2c3e50;
-    background: linear-gradient(90deg, #3498db, #8e44ad);
+    font-size: 1rem; /* Ugyanakkora méret, mint a navbar linkek */
+    font-weight: bold; /* Maradjon vastag */
+    background: linear-gradient(90deg, #3498db, #8e44ad); /* Színátmenet */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    display: inline-block;
-    padding-bottom: 5px;
-    border-bottom: 3px solid #3498db;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem; /* Ugyanaz a padding, mint a gomboknál */
+    border-bottom: none; /* Ne legyen aláhúzás */
+    white-space: nowrap; /* Ne törjön új sorba kis képernyőn sem */
 }
+
