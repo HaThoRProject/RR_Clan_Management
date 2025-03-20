@@ -16,8 +16,11 @@
 
 </head>
 <body>
-    <h2>Játékosok listája</h2>
-    <a asp-controller="Player" asp-action="Create" class="btn btn-primary mb-3">+ Player felvétele</a>
+    <div class="d-flex align-items-center mb-3">
+        <h2 class="mb-0 me-3">Játékosok listája</h2>
+        <a asp-controller="Player" asp-action="Create" class="btn btn-primary">+ Player felvétele</a>
+    </div>
+
     <div class="table-responsive">
     <table id="playersTable" class="table table-striped table-bordered">
             <thead class="thead-dark">
