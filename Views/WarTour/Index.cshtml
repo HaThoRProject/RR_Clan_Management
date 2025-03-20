@@ -3,7 +3,7 @@
 <div class="d-flex align-items-center gap-2 mb-3">
     <h2 class="mb-0">War / Tour</h2>
     <button id="edit-btn" class="btn btn-primary">Szerkesztés</button>
-    <button id="add-column-btn" class="btn btn-success" style="display: none;">Oszlop hozzáadása</button>
+    <button id="add-column-btn" class="btn btn-success" style="display: none;">Adat +</button>
     <button id="save-btn" class="btn btn-warning" style="display: none;">Mentés</button>
 </div>
 
@@ -137,12 +137,15 @@
         let tableBody = document.getElementById("table-body");
         let rows = tableBody.getElementsByTagName("tr");
 
+        let columnIndex = tableHeader.cells.length - 1; // Az új oszlop indexe
+        addedColumns.push(columnIndex); // Eltároljuk az új oszlop indexét
+
         for (let row of rows) {
             let newTd = document.createElement("td");
             let select = document.createElement("select");
             select.className = "form-control";
 
-            let options = ["Részt vett", "Részben vett részt", "Nem vett részt", "Felmentve"];
+            let options = ["-", "Részt vett", "Részben vett részt", "Nem vett részt", "Felmentve"];
             options.forEach(optionText => {
                 let option = document.createElement("option");
                 option.value = optionText;
@@ -155,8 +158,11 @@
         }
 
         // 📌 Automatikusan odagörget az új oszlophoz
-        newTh.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => {
+            newTh.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
     });
+
 
     document.getElementById("save-btn").addEventListener("click", function () {
         let table = document.getElementById("table-body");
