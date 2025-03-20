@@ -5,8 +5,8 @@
 @if (User.Identity.IsAuthenticated)
 {
     <div class="welcome-container">
-        <h2 class="welcome-text">Üdv, @User.Identity.Name!</h2>
-@*        <form method="post" asp-action="Logout" asp-controller="Home">
+        @*        <h2 class="welcome-text">Üdv, @User.Identity.Name!</h2>
+       <form method="post" asp-action="Logout" asp-controller="Home">
             <button type="submit" class="btn btn-danger mt-3">Kijelentkezés</button>
     </form> *@
     </div>
