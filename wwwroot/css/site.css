@@ -175,3 +175,7 @@ tr:nth-child(even) {
     white-space: nowrap; /* Ne törjön új sorba kis képernyőn sem */
 }
 
+.gap-2 {
+    gap: 10px; /* Kisebb távolság a cím és a gombok között */
+}
+
