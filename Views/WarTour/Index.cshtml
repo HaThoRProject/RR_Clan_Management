@@ -1,6 +1,11 @@
 ﻿@model RR_Clan_Management.ViewModels.WarTourViewModel
 
-<h2>WarTour</h2>
+<div class="d-flex align-items-center gap-2 mb-3">
+    <h2 class="mb-0">War / Tour</h2>
+    <button id="edit-btn" class="btn btn-primary">Szerkesztés</button>
+    <button id="add-column-btn" class="btn btn-success" style="display: none;">Oszlop hozzáadása</button>
+    <button id="save-btn" class="btn btn-warning" style="display: none;">Mentés</button>
+</div>
 
 @if (Model.Rows.Count == 0)
 {
@@ -12,10 +17,10 @@
     Összes játékos megjelenítése
 </label>
 
-
+@*
 <button id="edit-btn" class="btn btn-primary">Szerkesztés</button>
 <button id="add-column-btn" class="btn btn-secondary" style="display:none;">Oszlop hozzáadása</button>
-<button id="save-btn" class="btn btn-success" style="display:none;">Mentés</button>
+<button id="save-btn" class="btn btn-success" style="display:none;">Mentés</button>*@
 <div class="table-container">
     <table class="warTourTable">
     <thead>
@@ -42,12 +47,81 @@
 </table>
 </div>
 
-
-
 <script>
+    let isEditing = false; // Állapotváltozó a szerkesztési mód követésére
+    let originalData = []; // Eredeti adatok tárolása
+    let addedColumns = []; // Hozzáadott oszlopok tárolása
+
     document.getElementById("edit-btn").addEventListener("click", function () {
-        document.getElementById("add-column-btn").style.display = "inline-block";
-        document.getElementById("save-btn").style.display = "inline-block";
+        let tableHeader = document.getElementById("table-header");
+        let tableBody = document.getElementById("table-body");
+        let rows = tableBody.getElementsByTagName("tr");
+
+        if (!isEditing) {
+            // 🔹 Szerkesztési mód aktiválása
+            document.getElementById("add-column-btn").style.display = "inline-block";
+            document.getElementById("save-btn").style.display = "inline-block";
+            this.textContent = "Mégse"; // Gomb szövegének megváltoztatása
+
+            originalData = [];
+            addedColumns = [];
+
+            for (let row of rows) {
+                let rowData = [];
+                for (let i = 1; i < row.cells.length; i++) {
+                    let cell = row.cells[i];
+                    let currentText = cell.textContent.trim();
+                    rowData.push(currentText);
+
+                    if (cell.querySelector("select")) continue;
+
+                    let select = document.createElement("select");
+                    select.className = "form-control";
+
+                    let options = ["-", "Részt vett", "Részben vett részt", "Nem vett részt", "Felmentve"];
+                    options.forEach(optionText => {
+                        let option = document.createElement("option");
+                        option.value = optionText;
+                        option.textContent = optionText;
+                        if (optionText === currentText || (currentText === "" && optionText === "-")) {
+                            option.selected = true;
+                        }
+                        select.appendChild(option);
+                    });
+
+                    cell.textContent = "";
+                    cell.appendChild(select);
+                }
+                originalData.push(rowData);
+            }
+
+            isEditing = true;
+
+        } else {
+            // 🔹 Visszaállítás alap nézetre (mentés nélkül)
+            document.getElementById("add-column-btn").style.display = "none";
+            document.getElementById("save-btn").style.display = "none";
+            this.textContent = "Szerkesztés";
+
+            let rowIndex = 0;
+            for (let row of rows) {
+                for (let i = 1; i < row.cells.length; i++) {
+                    row.cells[i].textContent = originalData[rowIndex][i - 1];
+                }
+                rowIndex++;
+            }
+
+            // Újonnan hozzáadott oszlopok eltávolítása
+            addedColumns.forEach(index => {
+                tableHeader.deleteCell(index);
+                for (let row of rows) {
+                    row.deleteCell(index);
+                }
+            });
+
+            isEditing = false;
+            addedColumns = [];
+        }
     });
 
     document.getElementById("add-column-btn").addEventListener("click", function () {
@@ -79,6 +153,9 @@
             newTd.appendChild(select);
             row.appendChild(newTd);
         }
+
+        // 📌 Automatikusan odagörget az új oszlophoz
+        newTh.scrollIntoView({ behavior: "smooth", block: "center" });
     });
 
     document.getElementById("save-btn").addEventListener("click", function () {
