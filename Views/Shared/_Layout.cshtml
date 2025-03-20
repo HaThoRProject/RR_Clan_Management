@@ -16,7 +16,7 @@
                 <div class="container-fluid">
                     <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                         RR_Clan_Management
-                        <span class="welcome-text ms-2"> @(User.Identity.IsAuthenticated ? "- Üdv, " + User.Identity.Name + "!" : "") </span>
+                        <span class="welcome-text ms-2"> @(User.Identity.IsAuthenticated ? " Üdv, " + User.Identity.Name + "!" : "") </span>
                     </a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
