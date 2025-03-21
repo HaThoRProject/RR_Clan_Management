@@ -1,24 +1,24 @@
 ﻿html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 .home-background {
@@ -98,7 +98,8 @@ tr:nth-child(even) {
 .table-container {
     width: 100%;
     overflow-x: auto;
-    white-space: nowrap;
+    overflow-y: auto;
+    max-height: 80vh; /* Az ablak magasságának 80%-át engedélyezi */
     position: relative;
 }
 
@@ -109,35 +110,46 @@ tr:nth-child(even) {
     min-width: 100%;
 }
 
-.warTourTable th{
-    background: white;
-    border: 1px solid #ddd;
-    text-align: center;
-}
-.warTourTable td {
-    
-    border: 1px solid #ddd;
-    text-align: center;
-    background: #f2f2f2;
-}
+    .warTourTable th {
+        background: white;
+        border: 1px solid #ddd;
+        text-align: center;
+        padding: 10px;
+    }
 
-/* Első oszlop rögzítése */
-.warTourTable th:first-child {
-    position: sticky;
-    left: 0;
-    background: white;
-    border-right: 1px solid #ddd;
-    z-index: 2;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
-.warTourTable td:first-child {
-    position: sticky;
-    left: 0;
-    background: #f2f2f2;
-    border-right: 1px solid #ddd;
-    z-index: 2;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-}
+    .warTourTable td {
+        border: 1px solid #ddd;
+        text-align: center;
+        background: #f2f2f2;
+    }
+
+    /* Első oszlop rögzítése */
+    .warTourTable th:first-child {
+        position: sticky;
+        left: 0;
+        background: white;
+        border-right: 1px solid #ddd;
+        z-index: 2;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .warTourTable td:first-child {
+        position: sticky;
+        left: 0;
+        background: #f2f2f2;
+        border-right: 1px solid #ddd;
+        z-index: 2;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+    /* Fejléc rögzítése */
+    .warTourTable thead {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 3;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
 .login-container {
     position: absolute;
     top: 80px; /* A menüsor alatt marad */
@@ -154,6 +166,7 @@ tr:nth-child(even) {
         width: 80%;
     }
 }
+
 .welcome-container {
     position: absolute;
     top: 80px; /* A menüsor alatt marad */
@@ -179,3 +192,24 @@ tr:nth-child(even) {
     gap: 10px; /* Kisebb távolság a cím és a gombok között */
 }
 
+
+td.green {
+    background-color: #c3e6cb !important;
+}
+/* Zöld */
+td.yellow {
+    background-color: #ffeeba !important;
+}
+/* Sárga */
+td.red {
+    background-color: #f5c6cb !important;
+}
+/* Piros */
+td.blue {
+    background-color: #b3d7ff !important;
+}
+/* Kék */
+td.gray {
+    background-color: #e2e3e5 !important;
+}
+/* Szürke */
