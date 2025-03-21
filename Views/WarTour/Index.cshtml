@@ -153,6 +153,8 @@
                 select.appendChild(option);
             });
 
+            select.value = "Részt vett"; // 📌 Beállítja az alapértelmezett értéket
+
             newTd.appendChild(select);
             row.appendChild(newTd);
         }
@@ -162,6 +164,7 @@
             newTh.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
     });
+
 
 
     document.getElementById("save-btn").addEventListener("click", function () {
