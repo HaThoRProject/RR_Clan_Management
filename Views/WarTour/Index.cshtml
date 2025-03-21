@@ -33,16 +33,26 @@
         </tr>
     </thead>
     <tbody id="table-body">
-        @foreach (var row in Model.Rows)
-        {
-            <tr>
-                <td>@row.PlayerName</td>
-                @foreach (var column in Model.ColumnHeaders)
-                {
-                    <td>@(row.Columns.ContainsKey(column) ? row.Columns[column] : "-")</td>
-                }
-            </tr>
-        }
+            @foreach (var row in Model.Rows)
+            {
+                <tr>
+                    <td>@row.PlayerName</td>
+                    @foreach (var column in Model.ColumnHeaders)
+                    {
+                        var value = row.Columns.ContainsKey(column) ? row.Columns[column] : "-";
+                        var cssClass = "";
+
+                        if (value == "Részt vett") cssClass = "green";
+                        else if (value == "Részben vett részt") cssClass = "yellow";
+                        else if (value == "Nem vett részt") cssClass = "red";
+                        else if (value == "Felmentve") cssClass = "blue";
+                        else if (value == "-") cssClass = "gray";
+
+                        <td class="@cssClass">@value</td>
+                    }
+                </tr>
+            }
+
     </tbody>
 </table>
 </div>
