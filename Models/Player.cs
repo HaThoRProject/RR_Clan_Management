@@ -29,5 +29,20 @@ namespace RR_Clan_Management.Models
 
         [FirestoreProperty]
         public string? Notes { get; set; }
+
+        public string TimeInClan
+        {
+            get
+            {
+                if (DateTime.TryParse(JoinDate, out var join))
+                {
+                    var leave = DateTime.TryParse(LeaveDate, out var tempLeave) ? tempLeave : DateTime.Now;
+                    var duration = leave - join;
+                    return $"{duration.Days} nap";
+                }
+                return "N/A";
+            }
+        }
+
     }
 }
