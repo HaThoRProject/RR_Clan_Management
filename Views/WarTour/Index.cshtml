@@ -182,10 +182,8 @@
             deleteBtn.onclick = function () {
                 let index = Array.from(headerCells).indexOf(th);
 
-                // 🔹 Oszlopnév beolvasása (inputból vagy sima szövegből)
                 let columnName = input.value.trim() || th.textContent.trim();
 
-                // ✅ Megerősítő kérdés oszlopnévvel
                 if (!confirm(`Biztosan törölni szeretnéd a(z) "${columnName}" nevű oszlopot?`)) {
                     return;
                 }
@@ -199,6 +197,11 @@
                 for (let row of rows) {
                     row.deleteCell(index);
                 }
+
+                // ⛏️ Frissítjük az addedColumns tömböt
+                addedColumns = addedColumns
+                    .filter(i => i !== index)                 // eltávolítjuk a törölt oszlop indexét
+                    .map(i => i > index ? i - 1 : i);         // eltoljuk a későbbi indexeket
             };
 
             th.appendChild(input);
@@ -258,9 +261,16 @@
         let headers = document.getElementById("table-header").getElementsByTagName("th");
 
         let columnNames = [];
+        let columnIndices = [];
+
         for (let i = 1; i < headers.length; i++) {
             let input = headers[i].querySelector("input");
-            columnNames.push(input ? input.value : headers[i].textContent);
+            let colName = input ? input.value.trim() : headers[i].textContent.trim();
+
+            if (colName !== "") {
+                columnNames.push(colName);
+                columnIndices.push(i);
+            }
         }
 
         let data = [];
@@ -268,10 +278,13 @@
             let playerName = row.cells[0].textContent;
             let rowData = { PlayerName: playerName, Columns: {} };
 
-            for (let i = 1; i < row.cells.length; i++) {
-                let select = row.cells[i].querySelector("select");
+            for (let i = 0; i < columnIndices.length; i++) {
+                let colIndex = columnIndices[i];
+                let colName = columnNames[i];
+
+                let select = row.cells[colIndex].querySelector("select");
                 if (select) {
-                    rowData.Columns[columnNames[i - 1]] = select.value;
+                    rowData.Columns[colName] = select.value;
                 }
             }
 
@@ -287,11 +300,11 @@
         }).then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    location.reload(); // ✅ Ha sikeres a mentés, frissítjük az oldalt
+                    location.reload(); // ✅ Sikeres mentés esetén frissítjük az oldalt
                 }
-
-        });
+            });
     });
+
 </script>
 
 <script>
