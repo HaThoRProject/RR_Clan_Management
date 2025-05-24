@@ -93,24 +93,14 @@ namespace RR_Clan_Management.Controllers
                 if (docSnapshot.Exists)
                 {
                     var existingData = docSnapshot.ConvertTo<WarTourEntry>();
-                    if (existingData.Columns != null)
-                    {
-                        // 📌 Az új adatokat hozzáadjuk a meglévőhöz, nem töröljük
-                        foreach (var kvp in updatedColumns)
-                        {
-                            existingData.Columns[kvp.Key] = kvp.Value;
-                        }
-                    }
-                    else
-                    {
-                        existingData.Columns = updatedColumns;
-                    }
+
+                    // 🔁 Itt a korábbi összevonás helyett felülírjuk a Columns-t
+                    existingData.Columns = updatedColumns;
 
                     await docRef.SetAsync(existingData);
                 }
                 else
                 {
-                    // 📌 Új játékos esetén mentjük az adatokat
                     await docRef.SetAsync(entry);
                 }
             }
