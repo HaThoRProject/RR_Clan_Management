@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Statisztika";
+}
+
+<h1>Statisztika</h1>
+
+<div class="mb-4">
+    <a asp-controller="Statistics" asp-action="PlayerStats" class="btn btn-primary me-2">
+        Játékos statisztika
+    </a>
+    <a asp-controller="Statistics" asp-action="WarTourStats" class="btn btn-primary me-2">
+        War / Tour statisztika
+    </a>
+</div>
+
+<p>Válassz statisztikai kategóriát.</p>

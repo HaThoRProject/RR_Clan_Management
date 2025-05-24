@@ -1,0 +1,81 @@
+﻿@model List<RR_Clan_Management.Models.Player>
+
+<style>
+    /* Alap háttér szín minden sorra */
+    table.table tbody tr {
+        background-color: white !important;
+        color: black;
+    }
+
+        /* Kilépett játékosok kiemelése */
+        table.table tbody tr.left-clan {
+            background-color: #ffe5e5 !important; /* halvány piros */
+            color: black;
+        }
+
+    /* Fejléc */
+    table.table thead th {
+        background-color: white;
+        color: black;
+    }
+
+    .stats-row div {
+        margin-right: 1.5rem;
+    }
+</style>
+
+
+
+@{
+    ViewData["Title"] = "Játékos statisztika";
+}
+
+<div class="d-flex justify-content-start align-items-center flex-wrap mb-3">
+    <h2 class="mb-0 me-4">Játékosok</h2>
+    <div class="d-flex flex-wrap gap-3 justify-content-start">
+        <div><strong>Szabad hely:</strong> @ViewBag.FreeSlots fő</div>
+        <div><strong>Összes eddig tag:</strong> @ViewBag.TotalPlayers fő</div>
+        <div><strong>Aktív tag:</strong> @ViewBag.ActivePlayers fő</div>
+        <div><strong>Kiléptek:</strong> @ViewBag.InactivePlayers fő</div>
+    </div>
+</div>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Játékosnév</th>
+            <th>Név</th>
+            <th>Klánban töltött idő</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count > 0)
+        {
+            int index = 1;
+            @foreach (var player in Model)
+            {
+                var rowClass = !string.IsNullOrEmpty(player.LeaveDate) ? "left-clan" : "";
+
+                <tr class="@rowClass">
+                    <td>@player.PlayerName</td>
+                    <td>@player.Name</td>
+                    <td>@player.TimeInClan</td>
+                </tr>
+                index++;
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4" class="text-center text-muted">Nincs elérhető adat.</td>
+            </tr>
+        }
+    </tbody>
+
+
+
+</table>
+
+
+
