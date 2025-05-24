@@ -13,3 +13,5 @@ namespace RR_Clan_Management.Models
         public Dictionary<string, string> Columns { get; set; } = new Dictionary<string, string>(); // Oszlopok és értékek
     }
 }
+
+
