@@ -5,6 +5,7 @@
     <button id="edit-btn" class="btn btn-primary">Szerkesztés</button>
     <button id="add-column-btn" class="btn btn-success" style="display: none;">+Adat</button>
     <button id="save-btn" class="btn btn-warning" style="display: none;">Mentés</button>
+    <button id="edit-header-btn" class="btn btn-warning" style="display:none;">Fejléc módosítása</button>
 </div>
 
 @if (Model.Rows.Count == 0)
@@ -61,6 +62,8 @@
     let isEditing = false; // Állapotváltozó a szerkesztési mód követésére
     let originalData = []; // Eredeti adatok tárolása
     let addedColumns = []; // Hozzáadott oszlopok tárolása
+    let originalHeaders = []; // 💾 Fejléc mentése
+
 
     document.getElementById("edit-btn").addEventListener("click", function () {
         let tableHeader = document.getElementById("table-header");
@@ -71,10 +74,19 @@
             // 🔹 Szerkesztési mód aktiválása
             document.getElementById("add-column-btn").style.display = "inline-block";
             document.getElementById("save-btn").style.display = "inline-block";
+            document.getElementById("edit-header-btn").style.display = "inline-block";
             this.textContent = "Mégse"; // Gomb szövegének megváltoztatása
 
             originalData = [];
             addedColumns = [];
+
+            // Fejléc nevek elmentése
+            let headerCells = document.getElementById("table-header").getElementsByTagName("th");
+            originalHeaders = [];
+            for (let i = 1; i < headerCells.length; i++) {
+                originalHeaders.push(headerCells[i].textContent.trim());
+            }
+
 
             for (let row of rows) {
                 let rowData = [];
@@ -111,7 +123,17 @@
             // 🔹 Visszaállítás alap nézetre (mentés nélkül)
             document.getElementById("add-column-btn").style.display = "none";
             document.getElementById("save-btn").style.display = "none";
+            document.getElementById("edit-header-btn").style.display = "none";
             this.textContent = "Szerkesztés";
+
+            // Fejléc visszaállítása
+            let tableHeader = document.getElementById("table-header");
+            let headerCells = tableHeader.getElementsByTagName("th");
+            for (let i = 1; i < headerCells.length; i++) {
+                let cell = headerCells[i];
+                cell.textContent = originalHeaders[i - 1]; // ⬅ Eredeti fejlécnév vissza
+            }
+
 
             let rowIndex = 0;
             for (let row of rows) {
@@ -133,6 +155,59 @@
             addedColumns = [];
         }
     });
+
+   document.getElementById("edit-header-btn").addEventListener("click", function () {
+    let headerCells = document.querySelectorAll("#table-header th");
+    let startIndex = 1; // Az első oszlop (sorszám vagy név) nem szerkeszthető
+
+    for (let i = startIndex; i < headerCells.length; i++) {
+        let th = headerCells[i];
+
+        // Ne duplikáljuk az inputot vagy törlés gombot
+        if (th.querySelector("input")) continue;
+
+        let originalText = th.textContent;
+        th.textContent = "";
+
+        let input = document.createElement("input");
+        input.type = "text";
+        input.className = "form-control mb-1";
+        input.value = originalText;
+
+            // Törlés gomb
+            let deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Törlés";
+            deleteBtn.className = "btn btn-danger btn-sm d-block";
+
+            deleteBtn.onclick = function () {
+                let index = Array.from(headerCells).indexOf(th);
+
+                // 🔹 Oszlopnév beolvasása (inputból vagy sima szövegből)
+                let columnName = input.value.trim() || th.textContent.trim();
+
+                // ✅ Megerősítő kérdés oszlopnévvel
+                if (!confirm(`Biztosan törölni szeretnéd a(z) "${columnName}" nevű oszlopot?`)) {
+                    return;
+                }
+
+                // Töröljük a fejléc cellát
+                th.remove();
+
+                // Töröljük az adott indexű cellát minden sorból
+                let tableBody = document.getElementById("table-body");
+                let rows = tableBody.getElementsByTagName("tr");
+                for (let row of rows) {
+                    row.deleteCell(index);
+                }
+            };
+
+            th.appendChild(input);
+            th.appendChild(deleteBtn);
+
+    }
+});
+
+
 
     document.getElementById("add-column-btn").addEventListener("click", function () {
         let tableHeader = document.getElementById("table-header");
