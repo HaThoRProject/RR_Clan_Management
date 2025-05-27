@@ -87,7 +87,6 @@
                 originalHeaders.push(headerCells[i].textContent.trim());
             }
 
-
             for (let row of rows) {
                 let rowData = [];
                 for (let i = 1; i < row.cells.length; i++) {
@@ -134,7 +133,6 @@
                 cell.textContent = originalHeaders[i - 1]; // ⬅ Eredeti fejlécnév vissza
             }
 
-
             let rowIndex = 0;
             for (let row of rows) {
                 for (let i = 1; i < row.cells.length; i++) {
@@ -176,7 +174,7 @@
 
             // Törlés gomb
             let deleteBtn = document.createElement("button");
-            deleteBtn.textContent = "Oszlop törlése";
+            deleteBtn.textContent = "Törlés";
             deleteBtn.className = "btn btn-danger btn-sm d-block";
 
             deleteBtn.onclick = function () {
@@ -209,8 +207,6 @@
 
     }
 });
-
-
 
     document.getElementById("add-column-btn").addEventListener("click", function () {
         let tableHeader = document.getElementById("table-header");
@@ -253,8 +249,6 @@
         }, 100);
     });
 
-
-
     document.getElementById("save-btn").addEventListener("click", function () {
         let table = document.getElementById("table-body");
         let rows = table.getElementsByTagName("tr");
@@ -287,7 +281,6 @@
                     rowData.Columns[colName] = select.value;
                 }
             }
-
             data.push(rowData);
         }
 

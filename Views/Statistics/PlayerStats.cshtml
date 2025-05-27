@@ -24,8 +24,6 @@
     }
 </style>
 
-
-
 @{
     ViewData["Title"] = "Játékos statisztika";
 }
@@ -40,6 +38,9 @@
     </div>
 </div>
 
+<a asp-controller="Statistics" asp-action="Index" class="btn btn-success">
+    Vissza
+</a>
 
 <table class="table">
     <thead>
@@ -47,6 +48,8 @@
             <th>Játékosnév</th>
             <th>Név</th>
             <th>Klánban töltött idő</th>
+            <th>Visszatérő</th>
+            <th>Visszatérések száma</th>
         </tr>
     </thead>
     <tbody>
@@ -57,10 +60,20 @@
             {
                 var rowClass = !string.IsNullOrEmpty(player.LeaveDate) ? "left-clan" : "";
 
+                int totalJoins = player.MembershipHistory?.Count ?? 0;
+                int returnCount = totalJoins > 1 ? totalJoins - 1 : 0;
+                bool isReturning = returnCount > 0;
+
                 <tr class="@rowClass">
-                    <td>@player.PlayerName</td>
+
+
+                    <td>
+                        <a asp-controller="PlayerHistory" asp-action="Details" asp-route-id="@player.Id">@player.PlayerName</a>
+                    </td>
                     <td>@player.Name</td>
                     <td>@player.TimeInClan</td>
+                    <td>@(isReturning ? "Igen" : "Nem")</td>
+                    <td>@returnCount</td>
                 </tr>
                 index++;
             }
@@ -68,14 +81,14 @@
         else
         {
             <tr>
-                <td colspan="4" class="text-center text-muted">Nincs elérhető adat.</td>
+                <td colspan="5" class="text-center text-muted">Nincs elérhető adat.</td>
             </tr>
         }
     </tbody>
-
-
-
 </table>
+
+
+
 
 
 

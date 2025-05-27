@@ -1,0 +1,71 @@
+﻿@model RR_Clan_Management.Models.Player
+
+<button type="button" class="btn btn-success me-2" onclick="history.back()">Vissza</button>
+
+@{
+    ViewData["Title"] = "Player History";
+    var hasHistory = Model.MembershipHistory != null && Model.MembershipHistory.Any();
+    var showFallback = !hasHistory && (!string.IsNullOrEmpty(Model.JoinDate) || !string.IsNullOrEmpty(Model.LeaveDate));
+}
+
+<h2>Player History - @Model.PlayerName</h2>
+
+@if (hasHistory)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Belépési dátum</th>
+                <th>Kilépési dátum</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.MembershipHistory.Count; i++)
+            {
+                var joinDate = Model.MembershipHistory[i].JoinDate;
+                var leaveDate = Model.MembershipHistory[i].LeaveDate;
+
+                DateTime joinDt;
+                DateTime leaveDt;
+                bool joinParsed = DateTime.TryParse(joinDate, out joinDt);
+                bool leaveParsed = DateTime.TryParse(leaveDate, out leaveDt);
+
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@(joinParsed ? joinDt.ToString("yyyy-MM-dd") : joinDate)</td>
+                    <td>@(string.IsNullOrEmpty(leaveDate) ? "Bent van a klánban" : (leaveParsed ? leaveDt.ToString("yyyy-MM-dd") : leaveDate))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (showFallback)
+{
+    // Egy sor a régi JoinDate/LeaveDate alapján
+    DateTime joinDt;
+    DateTime leaveDt;
+    bool joinParsed = DateTime.TryParse(Model.JoinDate, out joinDt);
+    bool leaveParsed = DateTime.TryParse(Model.LeaveDate, out leaveDt);
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Belépési dátum</th>
+                <th>Kilépési dátum</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>@(joinParsed ? joinDt.ToString("yyyy-MM-dd") : Model.JoinDate)</td>
+                <td>@(string.IsNullOrEmpty(Model.LeaveDate) ? "Bent van a klánban" : (leaveParsed ? leaveDt.ToString("yyyy-MM-dd") : Model.LeaveDate))</td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Nincs elérhető tagsági történet.</p>
+}

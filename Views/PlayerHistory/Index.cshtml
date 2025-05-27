@@ -1,0 +1,35 @@
+﻿@model List<RR_Clan_Management.Models.Player>
+
+@{
+    ViewData["Title"] = "Player History";
+}
+
+<h2>Player History</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Játékos név</th>
+            <th>Belépési dátum</th>
+            <th>Kilépési dátum</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            int index = 1;
+            foreach (var player in Model)
+            {
+                var lastPeriod = player.MembershipHistory?.LastOrDefault();
+                <tr>
+                    <td>@index</td>
+                    <td>@player.PlayerName</td>
+                    <td>@(lastPeriod?.JoinDate ?? "-")</td>
+                    <td>@(lastPeriod?.LeaveDate ?? "-")</td>
+                </tr>
+                index++;
+            }
+        }
+    </tbody>
+</table>

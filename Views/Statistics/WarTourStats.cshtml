@@ -1,5 +1,82 @@
-﻿@{
-    ViewData["Title"] = "War / Tour statisztika";
+﻿@model RR_Clan_Management.Models.WarTourStatsViewModel
+
+
+
+@{
+    ViewData["Title"] = "War/Tour statisztika";
 }
+
 <h2>War / Tour statisztika</h2>
-<p>Itt jelennek majd meg a War / Tour teljesítmények.</p>
+
+<div class="d-flex gap-2 mb-3">
+    <a asp-action="WarTourStats" class="btn btn-primary">
+        Összes
+    </a>
+
+    <a asp-action="WarTourStatsLast3" class="btn btn-primary">
+        Utolsó 3 War / Tour
+    </a>
+
+    <a asp-controller="Statistics" asp-action="Index" class="btn btn-success">
+        Vissza
+    </a>
+</div>
+
+<table class="table" style="background-color: white;">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Játékos</th>
+            <th>Részt vett</th>
+            <th>Részben vett részt</th>
+            <th>Nem vett részt</th>
+            <th>Felmentve</th>
+            <th>Összesen</th>
+            <th>Részvételi arány (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Rows.Count; i++)
+        {
+            var item = Model.Rows[i];
+            double participationRate = item.TotalEvents > 0
+            ? Math.Round(((double)(item.Participated + 0.5 * item.Partial + 0.25 * item.Excused) / item.TotalEvents) * 100, 2)
+            : 0;
+
+            string rowClass = item.IsLeft ? "table-danger" : ""; // ← Bootstrap osztály
+
+            <tr style="
+@(
+    item.IsLeft
+        ? "background-color: #e0e0e0;" // Szürke, ha kilépett
+        : item.Last3Entries.Count(v => v == "Nem vett részt") >= 2
+            ? "background-color: #ffc0cb;" // Halvány piros
+            : item.Last3Entries.Count(v => v == "Részben vett részt") >= 2
+                ? "background-color: #fff8dc;" // Halvány sárga
+                : (item.Last3Entries.Count(v => v == "Nem vett részt") == 1 && item.Last3Entries.Count(v => v == "Részben vett részt") == 1)
+                    ? "background-color: #ffccaa;" // Narancsos átmenet
+                    : "background-color: white;"
+)">
+            
+                <td>@(i + 1)</td>
+                <td>@item.PlayerName</td>
+                <td>@item.Participated</td>
+                <td>@item.Partial</td>
+                <td>@item.Missed</td>
+                <td>@item.Excused</td>
+                <td>@item.TotalEvents</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(item.Note))
+                    {
+                        <span class="text-muted">@item.Note</span>
+                    }
+                    else
+                    {
+                        <span>@Math.Round(item.ParticipationPercent, 2) %</span>
+                    }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
