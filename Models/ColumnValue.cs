@@ -2,7 +2,7 @@
 {
     public class ColumnValue
     {
-        public string NewName { get; set; }
-        public string Value { get; set; }
+        public string NewName { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
     }
 }
