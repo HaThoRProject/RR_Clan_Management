@@ -51,39 +51,38 @@ namespace RR_Clan_Management.Controllers
             {
                 try
                 {
-                    // Firestore-ban való mentés
                     DocumentReference docRef = _firestoreDb.Collection("players").Document();
-                    player.Id = docRef.Id; // Egyedi ID generálása
+                    player.Id = docRef.Id;
+
+                    // MembershipHistory inicializálása
+                    player.MembershipHistory = new List<MembershipPeriod>
+            {
+                new MembershipPeriod
+                {
+                    JoinDate = DateTime.TryParse(player.JoinDate, out var parsedJoinDate)
+                        ? parsedJoinDate.ToString("yyyy-MM-dd")
+                        : DateTime.Now.ToString("yyyy-MM-dd"),
+
+                    LeaveDate = null
+                }
+            };
+
                     await docRef.SetAsync(player);
 
-                    // Ha sikeres, naplózzuk
                     Console.WriteLine("Player successfully added to Firestore");
 
-                    // Az új játékos hozzáadása után frissítjük a listát
-                    Query playersQuery = _firestoreDb.Collection("players");
-                    QuerySnapshot playersSnapshot = await playersQuery.GetSnapshotAsync();
-                    List<Player> players = new List<Player>();
-
-                    foreach (DocumentSnapshot doc in playersSnapshot.Documents)
-                    {
-                        if (doc.Exists)
-                        {
-                            Player p = doc.ConvertTo<Player>();
-                            players.Add(p);
-                        }
-                    }
-
-                    return View("Index", players); // Visszairányítjuk az Index nézetre, már frissített adatokkal
+                    return RedirectToAction("Index");
                 }
                 catch (Exception ex)
                 {
-                    // Hibakezelés
                     Console.WriteLine($"Error while adding player: {ex.Message}");
                     ModelState.AddModelError(string.Empty, "An error occurred while adding the player.");
                 }
             }
-            return View(player); // Ha nem érvényes a modell, visszaadjuk a játékost a nézetnek
+
+            return View(player);
         }
+
 
 
 
@@ -114,23 +113,79 @@ namespace RR_Clan_Management.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    DocumentReference docRef = _firestoreDb.Collection("players").Document(player.Id);
-                    await docRef.SetAsync(player, SetOptions.MergeAll);
+                DocumentReference docRef = _firestoreDb.Collection("players").Document(player.Id);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
 
-                    Console.WriteLine("Player successfully updated in Firestore");
-
-                    return RedirectToAction("Index"); // Visszairányítjuk a listára
-                }
-                catch (Exception ex)
+                if (!snapshot.Exists)
                 {
-                    Console.WriteLine($"Error while updating player: {ex.Message}");
-                    ModelState.AddModelError(string.Empty, "An error occurred while updating the player.");
+                    return NotFound();
                 }
+
+                Player existingPlayer = snapshot.ConvertTo<Player>();
+
+                // Biztonság kedvéért inicializáljuk
+                if (existingPlayer.MembershipHistory == null)
+                {
+                    existingPlayer.MembershipHistory = new List<MembershipPeriod>();
+                }
+
+                // Ha van előző időszak (mindkét dátum nem üres) és még nincs történet mentve, akkor elmentjük
+                if (string.IsNullOrEmpty(existingPlayer.LeaveDate) == false && string.IsNullOrEmpty(existingPlayer.JoinDate) == false && existingPlayer.MembershipHistory.Count == 0)
+                {
+                    existingPlayer.MembershipHistory.Add(new MembershipPeriod
+                    {
+                        JoinDate = existingPlayer.JoinDate,
+                        LeaveDate = existingPlayer.LeaveDate
+                    });
+                }
+
+
+                // Dátumparszolás
+                DateTime? newLeaveDate = DateTime.TryParse(player.LeaveDate, out var parsedLeaveDate) ? parsedLeaveDate : (DateTime?)null;
+                DateTime? oldLeaveDate = DateTime.TryParse(existingPlayer.LeaveDate, out var parsedOldLeaveDate) ? parsedOldLeaveDate : (DateTime?)null;
+
+                bool nowLeft = string.IsNullOrEmpty(existingPlayer.LeaveDate) && newLeaveDate != null;
+                bool nowReturned = !string.IsNullOrEmpty(existingPlayer.LeaveDate) && string.IsNullOrEmpty(player.LeaveDate);
+
+                // Távozás: frissítjük az utolsó tagsági időszak LeaveDate-jét
+                if (nowLeft)
+                {
+                    var lastPeriod = existingPlayer.MembershipHistory.FindLast(p => p.LeaveDate == null);
+                    if (lastPeriod != null)
+                    {
+                        lastPeriod.LeaveDate = newLeaveDate.HasValue
+                            ? newLeaveDate.Value.ToString("yyyy-MM-dd")
+                            : null;
+                    }
+                }
+                // Visszatérés: új tagsági időszak
+                else if (nowReturned)
+                {
+                    existingPlayer.MembershipHistory.Add(new MembershipPeriod
+                    {
+                        JoinDate = DateTime.TryParse(player.JoinDate, out var newJoinDate)
+                            ? newJoinDate.ToString("yyyy-MM-dd")
+                            : DateTime.Now.ToString("yyyy-MM-dd"),
+
+                        LeaveDate = null
+                    });
+                }
+
+                // Egyéb adatok frissítése
+                existingPlayer.Name = player.Name;
+                existingPlayer.PlayerName = player.PlayerName;
+                existingPlayer.JoinDate = player.JoinDate;
+                existingPlayer.LeaveDate = player.LeaveDate;
+                existingPlayer.Notes = player.Notes;
+
+                await docRef.SetAsync(existingPlayer, SetOptions.MergeAll);
+
+                return RedirectToAction("Index");
             }
+
             return View(player);
         }
+
 
 
 

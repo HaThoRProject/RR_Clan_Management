@@ -16,7 +16,6 @@ namespace RR_Clan_Management.Controllers
         {
             _firestoreDb = FirestoreDb.Create("rr-clan-management"); // Itt add meg a Firestore projekt azonosítóját
         }
-
         public async Task<IActionResult> Index(bool showAll = false)
         {
             var players = await GetPlayersAsync(showAll);
@@ -47,14 +46,6 @@ namespace RR_Clan_Management.Controllers
 
             return View(model);
         }
-
-
-
-
-
-
-
-
         private async Task<List<WarTourEntry>> GetWarTourEntriesAsync()
         {
             var tourCollection = _firestoreDb.Collection("WarTour");
@@ -76,7 +67,6 @@ namespace RR_Clan_Management.Controllers
 
             return warTourEntries;
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Save([FromBody] List<WarTourEntry> entries)
@@ -107,8 +97,6 @@ namespace RR_Clan_Management.Controllers
 
             return Json(new { success = true });
         }
-
-
         private async Task<List<Player>> GetPlayersAsync(bool showAll)
         {
             var playerCollection = _firestoreDb.Collection("players");
@@ -122,7 +110,5 @@ namespace RR_Clan_Management.Controllers
 
             return players;
         }
-
-
     }
 }
