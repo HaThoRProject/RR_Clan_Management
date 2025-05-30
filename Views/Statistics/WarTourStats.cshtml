@@ -47,15 +47,20 @@
 
             <tr style="
 @(
-    item.IsLeft
-        ? "background-color: #e0e0e0;" // Szürke, ha kilépett
-        : item.Last3Entries.Count(v => v == "Nem vett részt") >= 2
-            ? "background-color: #ffc0cb;" // Halvány piros
+   item.IsLeft
+    ? "background-color: #e0e0e0;" // Szürke, ha kilépett
+    : item.Last3Entries.Count(v => v == "Nem vett részt") >= 2
+        || item.Last3Entries.Count(v => v == "Nem vett részt") == 2 &&
+           item.Last3Entries.Count(v => v == "Részben vett részt") == 1
+        ? "background-color: #ffc0cb;" // Halvány piros
+        : item.Last3Entries.Count(v => v == "Részben vett részt") >= 2 &&
+          item.Last3Entries.Count(v => v == "Nem vett részt") == 1
+            || item.Last3Entries.Count(v => v == "Nem vett részt") == 1 &&
+               item.Last3Entries.Count(v => v == "Részben vett részt") == 1
+            ? "background-color: #ffccaa;" // Narancsos átmenet
             : item.Last3Entries.Count(v => v == "Részben vett részt") >= 2
                 ? "background-color: #fff8dc;" // Halvány sárga
-                : (item.Last3Entries.Count(v => v == "Nem vett részt") == 1 && item.Last3Entries.Count(v => v == "Részben vett részt") == 1)
-                    ? "background-color: #ffccaa;" // Narancsos átmenet
-                    : "background-color: white;"
+                : "background-color: white;"
 )">
             
                 <td>@(i + 1)</td>
