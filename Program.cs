@@ -17,11 +17,9 @@ catch (Exception ex)
     Console.WriteLine($"Firestore inicializálási hiba: {ex.Message}");
 }
 
-// Firebase Admin SDK inicializálása
-FirebaseApp.Create(new AppOptions()
-{
-    Credential = GoogleCredential.FromFile("rr-clan-management.json") // A letöltött JSON fájl elérési útja
-});
+// Firebase inicializálása
+string firebaseCredentialsPath = "/etc/secrets/rr-clan-management.json"; // A Render Secret File elérési útja
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", firebaseCredentialsPath);
 
 // Szolgáltatások regisztrálása
 builder.Services.AddControllersWithViews();
