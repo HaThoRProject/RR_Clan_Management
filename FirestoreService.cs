@@ -10,20 +10,27 @@ namespace RR_Clan_Management.Services
         private readonly FirestoreDb _firestoreDb;
 
         public FirestoreService()
+{
+    // 🔹 Próbáljuk lekérni a környezeti változóból a hitelesítési fájl elérési útját
+    string? credentialPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+
+    // 🔸 Ha nincs beállítva, akkor fejlesztői gépen állítsuk be manuálisan
+    if (string.IsNullOrEmpty(credentialPath))
+    {
+        credentialPath = Path.Combine(AppContext.BaseDirectory, "rr-clan-management.json");
+
+        if (!File.Exists(credentialPath))
         {
-            string credentialPath = @"E:\Learn\Visual Studio\RR_Clan_Management\rr-clan-management.json";
-
-            if (!File.Exists(credentialPath))
-            {
-                throw new FileNotFoundException("A Firestore hitelesítési fájl nem található!", credentialPath);
-            }
-
-            // 🔹 Állítsuk be a GOOGLE_APPLICATION_CREDENTIALS környezeti változót!
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
-
-            // 🔹 Inicializáljuk a Firestore kapcsolatot a beállított hitelesítéssel
-            _firestoreDb = FirestoreDb.Create("rr-clan-management");
+            throw new FileNotFoundException("A Firestore hitelesítési fájl nem található!", credentialPath);
         }
+
+        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
+    }
+
+    // 🔹 Inicializáljuk a Firestore kapcsolatot
+    _firestoreDb = FirestoreDb.Create("rr-clan-management");
+}
+
 
         public FirestoreDb GetDatabase()
         {
