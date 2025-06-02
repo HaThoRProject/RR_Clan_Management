@@ -66,11 +66,15 @@
 
 
     document.getElementById("edit-btn").addEventListener("click", function () {
+
         let tableHeader = document.getElementById("table-header");
         let tableBody = document.getElementById("table-body");
         let rows = tableBody.getElementsByTagName("tr");
 
         if (!isEditing) {
+
+            logClientEvent("War/Tour szerkesztés", "UI művelet");
+
             // 🔹 Szerkesztési mód aktiválása
             document.getElementById("add-column-btn").style.display = "inline-block";
             document.getElementById("save-btn").style.display = "inline-block";
@@ -119,6 +123,9 @@
             isEditing = true;
 
         } else {
+
+            logClientEvent("War/Tour szerkesztés visszavonása", "UI művelet");
+
             // 🔹 Visszaállítás alap nézetre (mentés nélkül)
             document.getElementById("add-column-btn").style.display = "none";
             document.getElementById("save-btn").style.display = "none";
@@ -155,6 +162,9 @@
     });
 
    document.getElementById("edit-header-btn").addEventListener("click", function () {
+
+        logClientEvent("War/Tour szerkesztés_fejléc", "UI művelet");
+
     let headerCells = document.querySelectorAll("#table-header th");
     let startIndex = 1; // Az első oszlop (sorszám vagy név) nem szerkeszthető
 
@@ -209,6 +219,9 @@
 });
 
     document.getElementById("add-column-btn").addEventListener("click", function () {
+
+        logClientEvent("War/Tour szerkesztés_új oszlop", "UI művelet");
+
         let tableHeader = document.getElementById("table-header");
         let newTh = document.createElement("th");
         let input = document.createElement("input");
@@ -250,6 +263,9 @@
     });
 
     document.getElementById("save-btn").addEventListener("click", function () {
+
+        logClientEvent("War/Tour szerkesztés_mentés", "UI művelet");
+
         let table = document.getElementById("table-body");
         let rows = table.getElementsByTagName("tr");
         let headers = document.getElementById("table-header").getElementsByTagName("th");
@@ -318,3 +334,28 @@
         }
     };
 </script>
+
+<script>
+    function logClientEvent(message, type = "ClientEvent") {
+        fetch('/WarTour/LogClientEvent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: message,
+                type: type
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    console.error("Logolás sikertelen:", response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error("Hálózati hiba:", error);
+            });
+    }
+</script>
+
+

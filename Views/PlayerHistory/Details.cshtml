@@ -1,71 +1,140 @@
-﻿@model RR_Clan_Management.Models.Player
+﻿@using System.Linq
+@model RR_Clan_Management.Models.PlayerDetailsViewModel
 
-<button type="button" class="btn btn-success me-2" onclick="history.back()">Vissza</button>
+<h2>Játékos: @Model.Player.PlayerName</h2>
 
-@{
-    ViewData["Title"] = "Player History";
-    var hasHistory = Model.MembershipHistory != null && Model.MembershipHistory.Any();
-    var showFallback = !hasHistory && (!string.IsNullOrEmpty(Model.JoinDate) || !string.IsNullOrEmpty(Model.LeaveDate));
-}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Belépési dátum</th>
+            <th>Kilépési dátum / Aktivitás</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Player.MembershipHistory != null && Model.Player.MembershipHistory.Any())
+        {
+            foreach (var period in Model.Player.MembershipHistory)
+            {
+                DateTime joinDate;
+                DateTime? leaveDate = null;
 
-<h2>Player History - @Model.PlayerName</h2>
+                bool joinParsed = DateTime.TryParse(period.JoinDate, out joinDate);
+                bool leaveParsed = DateTime.TryParse(period.LeaveDate, out var tmpLeaveDate);
+                if (leaveParsed) leaveDate = tmpLeaveDate;
 
-@if (hasHistory)
+                <tr>
+                    <td>@(joinParsed ? joinDate.ToString("yyyy-MM-dd") : period.JoinDate)</td>
+                    <td>
+                        @if (leaveDate == null)
+                        {
+                            var daysInClan = joinParsed ? (DateTime.Today - joinDate).Days : (int?)null;
+                            if (daysInClan != null)
+                            {
+                                <text>Klánban van @daysInClan napja</text>
+                            }
+                            else
+                            {
+                                <text>Klánban van</text>
+                            }
+                        }
+                        else
+                        {
+                            @(leaveDate?.ToString("yyyy-MM-dd"))
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else if (!string.IsNullOrEmpty(Model.Player.JoinDate))
+        {
+            <tr>
+                <td>@Model.Player.FormattedJoinDate</td>
+                <td>
+                    @if (string.IsNullOrEmpty(Model.Player.LeaveDate))
+                    {
+                        @($"A klánban van {Model.Player.TimeInClan}ja")
+                    }
+                    else
+                    {
+                        @Model.Player.FormattedLeaveDate
+                    }
+                </td>
+            </tr>
+
+        }
+        else
+        {
+            <tr>
+                <td colspan="2">Nincs elérhető tagsági történet.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>War / Tour statisztika</h3>
+
+@if (Model.StatRow != null)
 {
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Belépési dátum</th>
-                <th>Kilépési dátum</th>
+                <th>Összesen</th>
+                <th>Részt vett</th>
+                <th>Részben</th>
+                <th>Nem vett részt</th>
+                <th>Felmentve</th>
+                <th>Részvétel (%)</th>
             </tr>
         </thead>
         <tbody>
-            @for (int i = 0; i < Model.MembershipHistory.Count; i++)
-            {
-                var joinDate = Model.MembershipHistory[i].JoinDate;
-                var leaveDate = Model.MembershipHistory[i].LeaveDate;
+            <tr>
+                <td>@Model.StatRow.TotalEvents</td>
+                <td>@Model.StatRow.ParticipationCount</td>
+                <td>@Model.StatRow.PartialParticipationCount</td>
+                <td>@Model.StatRow.NotParticipatedCount</td>
+                <td>@Model.StatRow.ExcusedCount</td>
+                <td>@Model.StatRow.ParticipationPercent.ToString("0.0") %</td>
 
-                DateTime joinDt;
-                DateTime leaveDt;
-                bool joinParsed = DateTime.TryParse(joinDate, out joinDt);
-                bool leaveParsed = DateTime.TryParse(leaveDate, out leaveDt);
-
-                <tr>
-                    <td>@(i + 1)</td>
-                    <td>@(joinParsed ? joinDt.ToString("yyyy-MM-dd") : joinDate)</td>
-                    <td>@(string.IsNullOrEmpty(leaveDate) ? "Bent van a klánban" : (leaveParsed ? leaveDt.ToString("yyyy-MM-dd") : leaveDate))</td>
-                </tr>
-            }
+            </tr>
         </tbody>
     </table>
 }
-else if (showFallback)
-{
-    // Egy sor a régi JoinDate/LeaveDate alapján
-    DateTime joinDt;
-    DateTime leaveDt;
-    bool joinParsed = DateTime.TryParse(Model.JoinDate, out joinDt);
-    bool leaveParsed = DateTime.TryParse(Model.LeaveDate, out leaveDt);
 
+else
+{
+    <p>Nincs elérhető statisztika ehhez a játékoshoz.</p>
+}
+
+
+@if (Model.StatRowLast3 != null)
+{
+    <h4>Utolsó 3 War / Tour</h4>
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Belépési dátum</th>
-                <th>Kilépési dátum</th>
+                <th>Összesen</th>
+                <th>Részt vett</th>
+                <th>Részben</th>
+                <th>Nem vett részt</th>
+                <th>Felmentve</th>
+                <th>Részvétel (%)</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>1</td>
-                <td>@(joinParsed ? joinDt.ToString("yyyy-MM-dd") : Model.JoinDate)</td>
-                <td>@(string.IsNullOrEmpty(Model.LeaveDate) ? "Bent van a klánban" : (leaveParsed ? leaveDt.ToString("yyyy-MM-dd") : Model.LeaveDate))</td>
+                <td>@Model.StatRowLast3.TotalEvents</td>
+                <td>@Model.StatRowLast3.Participated</td>
+                <td>@Model.StatRowLast3.Partial</td>
+                <td>@Model.StatRowLast3.Missed</td>
+                <td>@Model.StatRowLast3.Excused</td>
+                <td>@Model.StatRowLast3.ParticipationPercent.ToString("0.0") %</td>
             </tr>
         </tbody>
     </table>
 }
 else
 {
-    <p>Nincs elérhető tagsági történet.</p>
+    <p>Nincs elérhető statisztika ehhez a játékoshoz: @Model.StatRow?.PlayerName.</p>
 }
+
+

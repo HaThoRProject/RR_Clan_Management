@@ -1,6 +1,7 @@
 ﻿using Google.Cloud.Firestore;
 using Microsoft.AspNetCore.Mvc;
 using RR_Clan_Management.Models;
+using RR_Clan_Management.Services;
 using RR_Clan_Management.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,13 +12,22 @@ namespace RR_Clan_Management.Controllers
     public class WarTourController : Controller
     {
         private readonly FirestoreDb _firestoreDb;
+        private readonly LogService _logService;
 
-        public WarTourController()
+        public WarTourController(FirestoreService firestoreService, LogService logService)
         {
             _firestoreDb = FirestoreDb.Create("rr-clan-management"); // Itt add meg a Firestore projekt azonosítóját
+            _logService = new LogService();
         }
         public async Task<IActionResult> Index(bool showAll = false)
         {
+            // 🔸 Logoljuk, ki nyitotta meg az oldalt
+            await _logService.LogEventAsync(
+                User.Identity?.Name ?? "Ismeretlen",
+                "WarTourView",
+                "War/Tour oldal megnyitva"
+            );
+
             var players = await GetPlayersAsync(showAll);
             players = players.OrderBy(p => p.PlayerName).ToList();
             var warTourEntries = await GetWarTourEntriesAsync();
@@ -110,5 +120,24 @@ namespace RR_Clan_Management.Controllers
 
             return players;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> LogClientEvent([FromBody] LogEntry entry)
+        {
+            await _logService.LogEventAsync(
+                User.Identity?.Name ?? "Anonymous",
+                entry.Message,
+                entry.Type ?? "ClientEvent"
+                );
+            return Ok();
+        }
+
+
+        public class LogEntry
+        {
+            public string Message { get; set; }
+            public string Type { get; set; } // Új mező
+        }
+
     }
 }

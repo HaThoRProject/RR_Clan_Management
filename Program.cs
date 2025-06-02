@@ -5,17 +5,38 @@ using RR_Clan_Management.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
-builder.WebHost.UseUrls($"http://*:{port}");
 
-// Firebase inicializálás
-string firebaseCredentialsPath = "/etc/secrets/rr-clan-management.json"; // A Render Secret File elérési útja
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", firebaseCredentialsPath);
+// Firestore inicializálása
+try
+{
+    FirestoreDb db = FirestoreDb.Create("rr-clan-management");
+    Console.WriteLine("Firestore kapcsolat sikeresen létrejött!");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Firestore inicializálási hiba: {ex.Message}");
+}
+
+// Firebase Admin SDK inicializálása
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("rr-clan-management.json") // A letöltött JSON fájl elérési útja
+});
 
 // Szolgáltatások regisztrálása
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddScoped<FirebaseAuthService>(); // <--- EZ HIÁNYZOTT
+builder.Services.AddSingleton<LogService>();
+
+builder.Services.AddSingleton(provider =>
+{
+    string projectId = "rr-clan-management"; // IDE írd be a projekted azonosítóját
+    return FirestoreDb.Create(projectId);
+});
+builder.Services.AddScoped<IStatService, StatService>();
+
+
 
 // Hitelesítés beállítása
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

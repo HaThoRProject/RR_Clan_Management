@@ -12,21 +12,26 @@ namespace RR_Clan_Management.Controllers
     public class StatisticsController : Controller
     {
         private readonly FirestoreDb _firestoreDb;
+        private readonly LogService _logService;
 
         public StatisticsController()
         {
             _firestoreDb = FirestoreDb.Create("rr-clan-management");
+            _logService = new LogService();
         }
 
         // GET: /Statistics/
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Statisztika_Fő oldal", "Statisztika főoldal megnyitva");
             return View();
         }
 
         // GET: /Statistics/PlayerStats
         public async Task<IActionResult> PlayerStats()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Statisztika_Players", "PlayerStats oldal megnyitva");
+
             Query playersQuery = _firestoreDb.Collection("players");
             QuerySnapshot playersSnapshot = await playersQuery.GetSnapshotAsync();
             List<Player> players = new List<Player>();
@@ -74,6 +79,8 @@ namespace RR_Clan_Management.Controllers
         // GET: /Statistics/WarTourStats
         public async Task<IActionResult> WarTourStats()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Statisztika_WarTour", "WarTourStats oldal megnyitva");
+
             // Játékosok lekérése
             var playersSnapshot = await _firestoreDb.Collection("players").GetSnapshotAsync();
             var players = playersSnapshot.Documents
@@ -83,6 +90,7 @@ namespace RR_Clan_Management.Controllers
 
             // WarTour bejegyzések lekérése
             var tourSnapshot = await _firestoreDb.Collection("WarTour").GetSnapshotAsync();
+
             var entries = new List<WarTourEntry>();
             foreach (var doc in tourSnapshot.Documents)
             {
@@ -140,6 +148,8 @@ namespace RR_Clan_Management.Controllers
 
         public async Task<IActionResult> WarTourStatsLast3()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Statisztika_Utolsó 3 War", "WarTourStatsLast3 oldal megnyitva");
+            
             var playersSnapshot = await _firestoreDb.Collection("players").GetSnapshotAsync();
             var tourSnapshot = await _firestoreDb.Collection("WarTour").GetSnapshotAsync();
 

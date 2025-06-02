@@ -31,5 +31,6 @@
     </div>
 
     <button type="submit" class="btn btn-success">Mentés</button>
-    <a asp-controller="Player" asp-action="Index" class="btn btn-secondary">Mégse</a>
+    <a asp-action="CancelEdit" asp-route-id="@Model.Id" class="btn btn-secondary">Mégse</a>
+
 </form>

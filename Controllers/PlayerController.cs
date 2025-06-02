@@ -11,14 +11,16 @@ namespace RR_Clan_Management.Controllers
     public class PlayerController : Controller
     {
         private readonly FirestoreDb _firestoreDb;
-
+        private readonly LogService _logService;
         public PlayerController()
         {
             _firestoreDb = FirestoreDb.Create("rr-clan-management"); // Firestore inicializálás
+            _logService = new LogService();
         }
-
         public async Task<IActionResult> Index()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player_menu", "Player menu opened");
+
             Query playersQuery = _firestoreDb.Collection("players");
             QuerySnapshot playersSnapshot = await playersQuery.GetSnapshotAsync();
             List<Player> players = new List<Player>();
@@ -38,16 +40,20 @@ namespace RR_Clan_Management.Controllers
 
             return View(players);
         }
+        
 
-        public IActionResult Create()
+        [HttpGet]
+        public async Task<IActionResult> Create()
         {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player felvitel", "Create player page opened");
             return View();
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create(Player player)
         {
-            if (ModelState.IsValid)
+           if (ModelState.IsValid)
             {
                 try
                 {
@@ -69,6 +75,8 @@ namespace RR_Clan_Management.Controllers
 
                     await docRef.SetAsync(player);
 
+                    await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player felvitel", $"Player felvéve: {player.Name} ({player.PlayerName})");
+
                     Console.WriteLine("Player successfully added to Firestore");
 
                     return RedirectToAction("Index");
@@ -83,13 +91,11 @@ namespace RR_Clan_Management.Controllers
             return View(player);
         }
 
-
-
-
         // GET: Edit Player - Megjeleníti a módosítási űrlapot
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
+
             if (string.IsNullOrEmpty(id))
             {
                 return NotFound();
@@ -104,6 +110,9 @@ namespace RR_Clan_Management.Controllers
             }
 
             Player player = snapshot.ConvertTo<Player>();
+
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player_módosítás", $"Player módosítás: {player.Name} ({player.PlayerName})");
+
             return View(player); // A View betölti az edit űrlapot az adatokkal
         }
 
@@ -138,7 +147,6 @@ namespace RR_Clan_Management.Controllers
                         LeaveDate = existingPlayer.LeaveDate
                     });
                 }
-
 
                 // Dátumparszolás
                 DateTime? newLeaveDate = DateTime.TryParse(player.LeaveDate, out var parsedLeaveDate) ? parsedLeaveDate : (DateTime?)null;
@@ -179,20 +187,43 @@ namespace RR_Clan_Management.Controllers
                 existingPlayer.Notes = player.Notes;
 
                 await docRef.SetAsync(existingPlayer, SetOptions.MergeAll);
+                await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player módosítás", $"Player updated: {existingPlayer.Name} ({existingPlayer.PlayerName})");
 
                 return RedirectToAction("Index");
             }
 
             return View(player);
         }
-
-
-
-
         public async Task<IActionResult> Delete(string id)
         {
             DocumentReference docRef = _firestoreDb.Collection("players").Document(id);
             await docRef.DeleteAsync();
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player törlés", $"Player deleted with ID: {id}");
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CancelEdit(string id)
+        {
+            if (!string.IsNullOrEmpty(id))
+            {
+                DocumentReference docRef = _firestoreDb.Collection("players").Document(id);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+                if (snapshot.Exists)
+                {
+                    Player player = snapshot.ConvertTo<Player>();
+                    await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player módosítás visszavonva", $"Edit canceled for: {player.Name} ({player.PlayerName})");
+                }
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> CancelCreate()
+        {
+            await _logService.LogEventAsync(User.Identity?.Name ?? "Ismeretlen", "Player felvitel visszavonva", "Player creation was canceled.");
             return RedirectToAction("Index");
         }
     }

@@ -14,7 +14,7 @@ namespace RR_Clan_Management.Models
         public string? PlayerName { get; set; } // Játékos neve
 
         [FirestoreProperty]
-        public Dictionary<string, string>? Selections { get; set; } = new Dictionary<string, string>();
+        public Dictionary<string, string>? Columns { get; set; } = new Dictionary<string, string>();
         // Oszlop neve → Kiválasztott érték (pl. "Tour 1" -> "Részt vett")
     }
 }
