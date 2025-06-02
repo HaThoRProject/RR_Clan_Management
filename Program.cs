@@ -5,6 +5,12 @@ using RR_Clan_Management.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://*:{port}");
+
+// Firebase inicializálása
+string firebaseCredentialsPath = "/etc/secrets/rr-clan-management.json"; // A Render Secret File elérési útja
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", firebaseCredentialsPath);
 
 // Firestore inicializálása
 try
@@ -16,10 +22,6 @@ catch (Exception ex)
 {
     Console.WriteLine($"Firestore inicializálási hiba: {ex.Message}");
 }
-
-// Firebase inicializálása
-string firebaseCredentialsPath = "/etc/secrets/rr-clan-management.json"; // A Render Secret File elérési útja
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", firebaseCredentialsPath);
 
 // Szolgáltatások regisztrálása
 builder.Services.AddControllersWithViews();
