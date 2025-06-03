@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace RR_Clan_Management.Services
 {
@@ -13,16 +14,22 @@ namespace RR_Clan_Management.Services
 
         public StatService(FirestoreDb firestoreDb)
         {
-            _firestoreDb = firestoreDb;
+            _firestoreDb = firestoreDb ?? throw new ArgumentNullException(nameof(firestoreDb));
+        }
+
+        private string NormalizeName(string? name)
+        {
+            return string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim().ToLowerInvariant();
         }
 
         public async Task<WarTourStatsViewModel> GetWarTourStatsAsync(bool onlyLast3 = false)
         {
+           // Debug.WriteLine("⚠️ GetWarTourStatsAsync elindult!");
+
             var viewModel = new WarTourStatsViewModel();
 
-            // Lekérjük az összes WarTour dokumentumot
+            // 1. WarTour adatok lekérése
             var warTourSnapshot = await _firestoreDb.Collection("WarTour").GetSnapshotAsync();
-            Console.WriteLine($"Dokumentumok száma: {warTourSnapshot.Documents.Count}");
 
             var warTours = new List<WarTour>();
 
@@ -37,7 +44,6 @@ namespace RR_Clan_Management.Services
                     Columns = new Dictionary<string, string>()
                 };
 
-                // A Columns mező helyes konvertálása Dictionary<string, object> -> Dictionary<string, string>
                 if (dict.TryGetValue("Columns", out var columnsObj) && columnsObj is Dictionary<string, object> rawColumns)
                 {
                     foreach (var kvp in rawColumns)
@@ -51,30 +57,26 @@ namespace RR_Clan_Management.Services
 
             if (warTours.Count == 0)
             {
-                Console.WriteLine("Nincsenek WarTour objektumok!");
+             //   Console.WriteLine("Nincsenek WarTour objektumok!");
                 return viewModel;
             }
 
-            // Esemény nevek kigyűjtése
+            // 2. Összes esemény meghatározása
             var allEvents = warTours
                 .SelectMany(wt => wt.Columns.Keys)
                 .Distinct()
+                .OrderBy(x => x)
                 .ToList();
 
-            allEvents.Sort(); // Lexikálisan (pl. dátum szerint)
+            var filterEvents = onlyLast3 && allEvents.Count > 3
+                ? allEvents.Skip(allEvents.Count - 3).ToList()
+                : allEvents;
 
-            // Csak utolsó 3, ha szükséges
-            List<string> filterEvents = allEvents;
-            if (onlyLast3 && allEvents.Count > 3)
-            {
-                filterEvents = allEvents.Skip(allEvents.Count - 3).ToList();
-            }
-
+            // 3. Statisztikák összeállítása
             var playerStats = new List<PlayerStat>();
 
             foreach (var player in warTours)
             {
-                int totalEvents = filterEvents.Count;
                 int participated = 0;
                 int partially = 0;
                 int notParticipated = 0;
@@ -98,20 +100,14 @@ namespace RR_Clan_Management.Services
                             case "Felmentve":
                                 excused++;
                                 break;
-                            default:
-                                notParticipated++;
-                                break;
                         }
-                    }
-                    else
-                    {
-                        notParticipated++;
                     }
                 }
 
+                int totalEvents = participated + partially + notParticipated + excused;
+
                 playerStats.Add(new PlayerStat
                 {
-                    PlayerId = player.Id ?? player.PlayerName ?? "N/A",
                     PlayerName = player.PlayerName ?? "N/A",
                     ParticipationCount = participated,
                     PartialParticipationCount = partially,
@@ -121,7 +117,6 @@ namespace RR_Clan_Management.Services
                 });
             }
 
-            // Itt töltsük fel a Rows listát is a WarTourStatsRow objektumokkal
             viewModel.Rows = playerStats
                 .Select(ps => new WarTourStatsRow
                 {
@@ -131,7 +126,7 @@ namespace RR_Clan_Management.Services
                     Missed = ps.NotParticipatedCount,
                     Excused = ps.ExcusedCount,
                     TotalEvents = ps.TotalEvents,
-                    IsLeft = false // Ha van infód a kilépésről, ide jöhet
+                    IsLeft = false
                 })
                 .ToList();
 
@@ -139,6 +134,5 @@ namespace RR_Clan_Management.Services
 
             return viewModel;
         }
-
     }
 }

@@ -84,13 +84,23 @@ namespace RR_Clan_Management.Controllers
             // Játékosok lekérése
             var playersSnapshot = await _firestoreDb.Collection("players").GetSnapshotAsync();
             var players = playersSnapshot.Documents
-                .Select(doc => doc.ConvertTo<Player>())
+                .Select(doc =>
+                {
+                    var player = doc.ConvertTo<Player>();
+                    player.Id = doc.Id; // ID beállítása
+                    return player;
+                })
                 .Where(p => !string.IsNullOrWhiteSpace(p.PlayerName))
                 .ToList();
 
+            // Normalizált név → ID leképezés
+            var nameToId = players.ToDictionary(
+                p => NormalizeName(p.PlayerName),
+                p => p.Id
+            );
+
             // WarTour bejegyzések lekérése
             var tourSnapshot = await _firestoreDb.Collection("WarTour").GetSnapshotAsync();
-
             var entries = new List<WarTourEntry>();
             foreach (var doc in tourSnapshot.Documents)
             {
@@ -128,13 +138,14 @@ namespace RR_Clan_Management.Controllers
                     return new WarTourStatsRow
                     {
                         PlayerName = player.PlayerName ?? "N/A",
+                        PlayerId = nameToId.TryGetValue(NormalizeName(player.PlayerName), out var pid) ? pid : null,
                         Participated = participated,
                         Partial = partial,
                         Missed = missed,
                         Excused = excused,
                         TotalEvents = total,
-                        IsLeft = isLeft, // ← Itt állítjuk be a színezéshez
-                        Note = note                        
+                        IsLeft = isLeft,
+                        Note = note
                     };
                 })
                 .OrderByDescending(r => r.TotalEvents)
@@ -145,6 +156,13 @@ namespace RR_Clan_Management.Controllers
 
             return View(model);
         }
+
+        // Segédfüggvény: név normalizálása (kisbetű + trim)
+        private static string NormalizeName(string name)
+        {
+            return name?.Trim().ToLowerInvariant();
+        }
+
 
         public async Task<IActionResult> WarTourStatsLast3()
         {
