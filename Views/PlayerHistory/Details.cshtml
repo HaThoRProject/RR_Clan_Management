@@ -1,7 +1,17 @@
 ﻿@using System.Linq
 @model RR_Clan_Management.Models.PlayerDetailsViewModel
 
-<h2>Játékos: @Model.Player.PlayerName</h2>
+<style>
+    .table th, .table td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<h2>
+    Játékos: @Model.Player.PlayerName
+    <button class="btn btn-sm btn-outline-secondary ms-3" onclick="history.back()">Vissza</button>
+</h2>
 
 <table class="table table-bordered">
     <thead>
@@ -80,7 +90,7 @@
             <tr>
                 <th>Összesen</th>
                 <th>Részt vett</th>
-                <th>Részben</th>
+                <th>Részben vett részt</th>
                 <th>Nem vett részt</th>
                 <th>Felmentve</th>
                 <th>Részvétel (%)</th>
@@ -114,7 +124,7 @@ else
             <tr>
                 <th>Összesen</th>
                 <th>Részt vett</th>
-                <th>Részben</th>
+                <th>Részben vett részt</th>
                 <th>Nem vett részt</th>
                 <th>Felmentve</th>
                 <th>Részvétel (%)</th>
