@@ -64,7 +64,18 @@
 )">
             
                 <td>@(i + 1)</td>
-                <td>@item.PlayerName</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.PlayerId))
+                    {
+                        <a asp-controller="PlayerHistory" asp-action="Details" asp-route-id="@item.PlayerId">
+                            @item.PlayerName
+                        </a>
+                    }
+                    else
+                    {
+                        @item.PlayerName
+                    }
+                </td>
                 <td>@item.Participated</td>
                 <td>@item.Partial</td>
                 <td>@item.Missed</td>
